@@ -171,7 +171,11 @@ export async function getCollectionProducts(
     ${PRODUCT_FRAGMENT}`,
     { handle, first, sortKey, reverse },
   )
-  if (!result || !result.data.collection) return []
+  if (!result || !result.data.collection) {
+    // Fallback to static demo products filtered by collection
+    const { getStaticCollectionProducts } = await import('@/lib/product-data')
+    return getStaticCollectionProducts(handle)
+  }
   return result.data.collection.products.edges.map((e: any) => normalizeProduct(e.node))
 }
 

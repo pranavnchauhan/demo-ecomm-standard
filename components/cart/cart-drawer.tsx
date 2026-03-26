@@ -15,8 +15,10 @@ export function CartDrawer() {
   const subtotal = cart?.cost.subtotalAmount?.amount ?? "0.00"
   const currency = cart?.cost.subtotalAmount?.currencyCode ?? "AUD"
 
+  const isDemo = !cart?.checkoutUrl || cart.checkoutUrl.startsWith("#")
+
   function handleCheckout() {
-    if (cart?.checkoutUrl && !cart.checkoutUrl.startsWith("#")) {
+    if (!isDemo && cart?.checkoutUrl) {
       window.location.href = cart.checkoutUrl
     }
   }
@@ -134,11 +136,16 @@ export function CartDrawer() {
 
             <button
               onClick={handleCheckout}
-              disabled={operationInProgress}
+              disabled={operationInProgress || isDemo}
               className="w-full py-3.5 bg-primary text-primary-foreground font-semibold rounded-full hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              Checkout
+              {isDemo ? "Checkout (Connect Shopify)" : "Checkout"}
             </button>
+            {isDemo && (
+              <p className="text-[11px] text-center text-muted-foreground">
+                Demo mode — connect Shopify to enable native checkout with shipping, taxes & payment
+              </p>
+            )}
             <button onClick={closeCart} className="w-full text-sm text-center text-muted-foreground hover:text-foreground">
               Continue Shopping
             </button>

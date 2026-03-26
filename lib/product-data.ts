@@ -131,7 +131,7 @@ const demoProducts: ShopifyProduct[] = [
     ],
     images: { edges: [{ node: { url: "/images/products/denim-jacket.jpg", altText: "Denim Jacket in Medium Wash" } }] },
     priceRange: { minVariantPrice: { amount: "179.00", currencyCode: "AUD" } },
-    compareAtPriceRange: null,
+    compareAtPriceRange: { minVariantPrice: { amount: "229.00", currencyCode: "AUD" } },
     variants: [
       { id: "v-7-1", title: "Medium Wash / M", availableForSale: true, selectedOptions: [{ name: "Color", value: "Medium Wash" }, { name: "Size", value: "M" }], price: { amount: "179.00", currencyCode: "AUD" } },
     ],
@@ -150,7 +150,7 @@ const demoProducts: ShopifyProduct[] = [
     ],
     images: { edges: [{ node: { url: "/images/products/skirt-black.jpg", altText: "Pleated Mini Skirt in Black" } }] },
     priceRange: { minVariantPrice: { amount: "89.00", currencyCode: "AUD" } },
-    compareAtPriceRange: null,
+    compareAtPriceRange: { minVariantPrice: { amount: "119.00", currencyCode: "AUD" } },
     variants: [
       { id: "v-8-1", title: "Black / M", availableForSale: true, selectedOptions: [{ name: "Color", value: "Black" }, { name: "Size", value: "M" }], price: { amount: "89.00", currencyCode: "AUD" } },
     ],
@@ -197,6 +197,19 @@ const demoProducts: ShopifyProduct[] = [
 
 export const staticProducts = demoProducts
 
+/**
+ * Collection → product mapping for demo mode.
+ * Maps Shopify collection handles to productType values or special filters.
+ */
+const COLLECTION_MAP: Record<string, (p: ShopifyProduct) => boolean> = {
+  "women": (p) => ["Dresses", "Skirts", "Activewear", "Tees", "Accessories"].includes(p.productType || ""),
+  "men": (p) => ["Tees", "Hoodies", "Jackets", "Pants", "Denim", "Shoes", "Accessories", "Activewear"].includes(p.productType || ""),
+  "accessories": (p) => ["Accessories", "Shoes"].includes(p.productType || ""),
+  "sale": (p) => p.compareAtPriceRange?.minVariantPrice != null && parseFloat(p.compareAtPriceRange.minVariantPrice.amount) > parseFloat(p.priceRange.minVariantPrice.amount),
+  "new-arrivals": (p) => ["Tees", "Hoodies", "Activewear", "Shoes", "Dresses"].includes(p.productType || ""),
+  "activewear": (p) => p.productType === "Activewear",
+}
+
 export function getStaticProducts(): ShopifyProduct[] {
   return demoProducts
 }
@@ -207,4 +220,10 @@ export function getStaticProduct(handle: string): ShopifyProduct | null {
 
 export function getStaticProductsByType(type: string): ShopifyProduct[] {
   return demoProducts.filter((p) => p.productType === type)
+}
+
+export function getStaticCollectionProducts(collectionHandle: string): ShopifyProduct[] {
+  const filter = COLLECTION_MAP[collectionHandle]
+  if (!filter) return demoProducts // unknown collection → show all
+  return demoProducts.filter(filter)
 }
